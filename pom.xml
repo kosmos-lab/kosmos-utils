@@ -2,9 +2,31 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.kosmos-lab</groupId>
-    <version>0.1</version>
+    <version>0.1.2</version>
     <artifactId>kosmos-utils</artifactId>
-
+    <name>kosmos-utils</name>
+    <description>Utility classes used for kosmos-lab</description>
+    <url>https://github.com/kosmos-lab/kosmos-utils</url>
+    <developers>
+        <developer>
+            <name>Jan Janssen</name>
+            <email>jan.janssen@dfki.de</email>
+            <organization>German Research Center for Artificial Intelligence (Deutsches Forschungszentrum für Künstliche
+                Intelligenz - DFKI)
+            </organization>
+            <organizationUrl>https://www.dfki.de</organizationUrl>
+        </developer>
+    </developers>
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
     <issueManagement>
         <url>https://github.com/kosmos-lab/kosmos-utils/issues</url>
         <system>GitHub Issues</system>
@@ -24,12 +46,18 @@
     <properties>
         <humanize.version>1.2.2</humanize.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>11</java.version>
+        <javaVersion>11</javaVersion>
         <skipTests>false</skipTests>
         <maven.compiler.release>11</maven.compiler.release>
         <mavenplugin.version>3.2.0</mavenplugin.version>
         <jettyVersion>9.4.32.v20200930</jettyVersion>
         <spotbugsVersion>4.4.1</spotbugsVersion>
+        <surefireVersion>3.0.0-M5</surefireVersion>
+        <mavenJarVersion>3.2.2</mavenJarVersion>
+        <jsr305Version>3.0.2</jsr305Version>
+        <commonsCodecVersion>1.15</commonsCodecVersion>
+        <testngVersion>7.5</testngVersion>
+        <logbackVersion>1.2.10</logbackVersion>
     </properties>
     <reporting>
         <plugins>
@@ -71,75 +99,34 @@
         </pluginRepository>
     </pluginRepositories>
 
-    <repositories>
-        <repository>
-            <id>central</id>
-            <name>Central Repository</name>
-            <url>https://repo.maven.apache.org/maven2</url>
-            <layout>default</layout>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-        <repository>
-            <id>bintray</id>
-            <url>https://jcenter.bintray.com</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
     <dependencies>
-
 
 
         <!--nullity annotations -->
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
-            <version>3.0.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.glassfish.tyrus.bundles</groupId>
-            <artifactId>tyrus-standalone-client</artifactId>
-            <version>2.0.0-M3</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.reflections/reflections -->
-        <dependency>
-            <groupId>org.reflections</groupId>
-            <artifactId>reflections</artifactId>
-            <version>0.9.12</version>
+            <version>${jsr305Version}</version>
         </dependency>
         <dependency>
             <groupId>com.github.spotbugs</groupId>
             <artifactId>spotbugs-annotations</artifactId>
             <version>${spotbugsVersion}</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/javax/javaee-api -->
-
 
 
         <!-- https://mvnrepository.com/artifact/commons-codec/commons-codec -->
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.15</version>
+            <version>${commonsCodecVersion}</version>
         </dependency>
 
 
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.8</version>
+            <version>${testngVersion}</version>
             <scope>test</scope>
         </dependency>
 
@@ -147,24 +134,14 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
-            <version>1.2.2</version>
+            <version>${logbackVersion}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.2.2</version>
+            <version>${logbackVersion}</version>
         </dependency>
-
-
-
-        <!-- https://mvnrepository.com/artifact/org.checkerframework/checker-qual -->
-        <dependency>
-            <groupId>org.checkerframework</groupId>
-            <artifactId>checker-qual</artifactId>
-            <version>3.7.0</version>
-        </dependency>
-
 
 
         <dependency>
@@ -178,6 +155,57 @@
         <sourceDirectory>src/main/java</sourceDirectory>
         <testSourceDirectory>src/test/java</testSourceDirectory>
         <plugins>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.7</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.2.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -202,8 +230,8 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
+                    <source>${javaVersion}</source>
+                    <target>${javaVersion}</target>
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
@@ -211,6 +239,10 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>3.1.2</version>
+                <configuration>
+
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
                 <executions>
                     <execution>
                         <id>copy-dependencies</id>
@@ -223,6 +255,7 @@
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>false</overWriteSnapshots>
                             <overWriteIfNewer>true</overWriteIfNewer>
+
                         </configuration>
                     </execution>
                 </executions>
@@ -231,9 +264,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.2.0</version>
-                <configuration>
 
+                <version>${mavenJarVersion}</version>
+                <configuration>
+                    <source>${javaVersion}</source>
+                    <target>${javaVersion}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
@@ -242,26 +278,17 @@
                     </archive>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M5</version>
+                <version>${surefireVersion}</version>
                 <configuration>
-
-
                     <includes>
-
                         <include>**/*.java</include>
-
-
                     </includes>
 
-                    <parallel>methods</parallel>
                     <threadCount>4</threadCount>
-
                 </configuration>
-
             </plugin>
         </plugins>
     </build>
