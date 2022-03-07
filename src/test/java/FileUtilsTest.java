@@ -14,8 +14,10 @@ import java.util.Random;
 import java.util.UUID;
 
 public class FileUtilsTest {
-    private static final String DIR_PATTERN = "tmp/%s";
-    private static final String DIR_PATTERN_4 = "tmp/%s/%s/%s/%s";
+    private static final String tmpdir = System.getProperty("java.io.tmpdir");
+    
+    private static final String DIR_PATTERN = tmpdir+"/%s";
+    private static final String DIR_PATTERN_4 = tmpdir+"/%s/%s/%s/%s";
     private static String mydir = String.format(DIR_PATTERN, UUID.randomUUID().toString());
     
     @Test

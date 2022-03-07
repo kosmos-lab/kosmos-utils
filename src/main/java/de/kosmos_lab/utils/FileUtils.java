@@ -22,16 +22,30 @@ public class FileUtils {
      * @return
      */
     public static boolean deleteDirectory(@Nonnull File directory) throws IllegalArgumentException {
-        if (directory == null) {
-            throw new IllegalArgumentException(String.format(Constants.PARAMATER_WAS_NULL, "file"));
-        }
+
         File[] allContents = directory.listFiles();
         if (allContents != null) {
             for (File file : allContents) {
                 deleteDirectory(file);
             }
         }
-        return directory.delete();
+        int tries =0;
+        while ( directory.exists()) {
+            if ( tries > 5) {
+                return false;
+            }
+            tries++;
+            if (!directory.delete()) {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        
+        return true;
+        
     }
     
     @Nonnull

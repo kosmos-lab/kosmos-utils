@@ -1,12 +1,44 @@
 package de.kosmos_lab.utils;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.annotation.CheckForNull;
+import java.util.HashSet;
 
 public class JSONFunctions {
-    public static Object get(@CheckForNull JSONObject json, @CheckForNull String path) {
+    public static boolean hasEntries(JSONArray jsonArray, String[] keys) {
+        HashSet<String> set = new HashSet<>();
+        try {
+            for (int i = 0; i < jsonArray.length(); i++) {
+                set.add(jsonArray.getString(i));
+            }
+        } catch (Exception ex) {
+            
+            return false;
+        }
+        for (String k : keys) {
+            if (!set.contains(k)) {
+                
+                return false;
+                
+            }
+        }
+        
+        return true;
+    }
+    public static boolean hasEntries(JSONObject json, String[] keys) {
+        
+        for (String k : keys) {
+            if (!json.has(k)) {
+                
+                return false;
+            }
+        }
+        return true;
+    }
+        public static Object get(@CheckForNull JSONObject json, @CheckForNull String path) {
         if (path == null || json == null) {
             return false;
         }
