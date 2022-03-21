@@ -9,6 +9,27 @@ import java.util.Date;
 
 
 public class FFMPEGWrapper {
+    public static class FFMPPEGRecording {
+        private final File file;
+        private final String input;
+        private Process process = null;
+
+        public FFMPPEGRecording(File file,String input) {
+            this.file = file;
+            this.input = input;
+        }
+        public void start() throws IOException {
+            String cmd = String.format("ffmpeg -i %s -acodec copy -vcodec copy %s",input,file.getCanonicalPath());
+            logger.info("executing: {}", cmd);
+            this.process = Runtime.getRuntime().exec(cmd);
+        }
+        public void stop() {
+            if ( this.process != null ) {
+                this.process.destroy();
+            }
+        }
+
+    }
     public static final String timePattern = "HH:mm:ss";
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger("FFMPEGWrapper");
     
