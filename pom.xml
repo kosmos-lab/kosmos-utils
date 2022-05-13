@@ -300,8 +300,7 @@
                 </repository>
             </distributionManagement>
         </profile>
-    </profiles>
-    <profiles>
+
         <profile>
             <id>deploy</id>
             <build>
