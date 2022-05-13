@@ -21,7 +21,7 @@ jobs:
         run: echo "::set-output name=version::$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
         id: version
       - name: bump
-        if: ${{endsWith(${{ steps.version.outputs.version }}, '-SNAPSHOT')}} == false
+        if: ${{endsWith(steps.version.outputs.version, '-SNAPSHOT')}} == false
         run: mvn versions:set -DnewVersion=${{ steps.version.outputs.version }}-SNAPSHOT
       - name: Publish package
         run: mvn --batch-mode clean deploy -Pgithub
