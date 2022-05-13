@@ -31,6 +31,12 @@
         <url>https://github.com/kosmos-lab/kosmos-utils/issues</url>
         <system>GitHub Issues</system>
     </issueManagement>
+    <repositories>
+        <repository>
+            <id>central</id>
+            <url>https://repo1.maven.org/maven2</url>
+        </repository>
+    </repositories>
     <scm>
         <url>https://github.com/kosmos-lab/kosmos-utils/</url>
         <connection>scm:git:git://github.com/kosmos-lab/kosmos-utils.git</connection>
@@ -286,6 +292,9 @@
                 <id>github</id>
                 <name>GitHub Packages</name>
                 <url>https://maven.pkg.github.com/ksomos-lab/${artifactId}</url>
+                <snapshots>
+                    <enabled>true</enabled>
+                </snapshots>
             </repository>
         </profile>
     </profiles>
