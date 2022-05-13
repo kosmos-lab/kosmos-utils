@@ -5,15 +5,60 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class StringFunctions {
-    
+
     private static final SecureRandom random = new SecureRandom();
-    
+
+    public static String format(String format, Map<String, Object> values) {
+        StringBuilder formatter = new StringBuilder(format);
+        List<Object> valueList = new ArrayList<Object>();
+
+        Matcher matcher = Pattern.compile("\\{(\\w+)}").matcher(format);
+
+        while (matcher.find()) {
+            String key = matcher.group(1);
+
+            String formatKey = String.format("{%s}", key);
+            int index = formatter.indexOf(formatKey);
+
+            if (index != -1) {
+                formatter.replace(index, index + formatKey.length(), "%s");
+                Object v = values.get(key);
+                if (v != null) {
+                    valueList.add(v);
+                } else {
+                    throw new IllegalArgumentException("value with the key " + key + " is not filled!");
+                }
+            }
+        }
+
+        return String.format(formatter.toString(), valueList.toArray());
+    }
+
+    public static String format(String format, Object[][] values) {
+        HashMap<String, Object> vals = new HashMap<>();
+        for (int i = 0; i < values.length; i++) {
+            Object v = values[i][0];
+            if (v instanceof String) {
+                vals.put((String) values[i][0], values[i][1]);
+            } else {
+                vals.put(String.valueOf(values[i][0]), values[i][1]);
+            }
+        }
+        return format(format,vals);
+    }
+
     @Nullable
     public static String decompose(@CheckForNull final String s) {
         if (s == null) {
@@ -22,7 +67,7 @@ public class StringFunctions {
         return java.text.Normalizer.normalize(s, java.text.Normalizer.Form.NFD)
                 .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
     }
-    
+
     @Nullable
     public static String filterFilename(@CheckForNull String input) {
         if (input == null) {
@@ -30,22 +75,23 @@ public class StringFunctions {
         }
         return input.replaceAll("[^A-Za-z0-9 \\.\\-_]", "");
     }
-    
+
     /**
      * removes anything from the text that is not alphanumeric
      *
      * @param input any inputtext
+     *
      * @return the text with everything but Alphanumerics and spaces stripped
      */
     @Nonnull
     public static String filterName(@Nonnull final String input) {
-        
+
         return trimDoubleSpaces(input.replaceAll("[^a-zA-Z0-9 ]", ""));
-        
+
     }
-    
+
     //static Pattern numPattern = Pattern.compile("([0-9])");
-    
+
     /**
      * Generate random key.
      *
@@ -53,10 +99,10 @@ public class StringFunctions {
      */
     @Nonnull
     public static String generateRandomKey() {
-        
+
         return generateRandomKey(26);
     }
-    
+
     /**
      * Generate random key.
      *
@@ -64,14 +110,14 @@ public class StringFunctions {
      */
     @Nonnull
     public static String generateRandomKey(int len) {
-        
+
         String s = "";
         while (s.length() != len) {
             s = new BigInteger(len * 5, random).toString(32);
         }
         return s;
     }
-    
+
     @Nonnull
     public static HashSet<String> getListOfString(@Nonnull final LinkedList<HashSet<String>> wordList) {
         if (wordList.size() > 0) {
@@ -80,7 +126,7 @@ public class StringFunctions {
                 final HashSet<String> w = wordList.get(i);
                 final HashSet<String> twords = new HashSet<>();
                 for (final String s : words) {
-                    
+
                     for (final String wo : w) {
                         twords.add(s + " " + wo);
                     }
@@ -90,19 +136,20 @@ public class StringFunctions {
             return words;
         }
         return new HashSet<>();
-        
+
     }
-    
+
     @Nonnull
     public static String replaceEverythingButNumbers(@Nonnull String text) {
         return text.replaceAll("[^\\d.\\.]", "");
-        
+
     }
-    
+
     /**
      * camelcases the input, ie "to camel case" will yield "toCamelCase"
      *
      * @param input the string to camelcase
+     *
      * @return the camelcased string
      */
     @Nullable
@@ -128,29 +175,30 @@ public class StringFunctions {
                 }
             }
         }
-        
+
         return ret.toString();
     }
-    
+
     /**
-     * trims away space and comma at the beginning and end and also removes double
-     * spacing
+     * trims away space and comma at the beginning and end and also removes double spacing
      *
      * @param input the input to trim
+     *
      * @return the trimmed input
      */
     @Nullable
     public static String trim(@CheckForNull final String input) {
-        
+
         return trim(input, new char[]{',', ' ', (char) 160, ' '});
-        
+
     }
-    
+
     /**
      * trims away any given characters, also removes double spaces
      *
      * @param input the input
      * @param chrs  the array of characters to remove
+     *
      * @return the trimmed input
      */
     @Nullable
@@ -161,7 +209,7 @@ public class StringFunctions {
         boolean changed = false;
         if (input.length() > 0) {
             for (final char c : chrs) {
-                
+
                 if (input.charAt(0) == c) {
                     input = input.substring(1);
                     changed = true;
@@ -178,15 +226,16 @@ public class StringFunctions {
                 return trim(input, chrs);
             }
         }
-        
+
         return trimDoubleSpaces(input);
-        
+
     }
-    
+
     /**
      * trims away double spaces
      *
      * @param input the input to trim
+     *
      * @return the trimmed string
      */
     @Nonnull

@@ -3,8 +3,33 @@ import de.kosmos_lab.utils.StringFunctions;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class StringFunctionsTest {
-    
+
+    @Test
+    public void testFormat() {
+        HashMap values = new HashMap<String,Object>();
+        values.put("user","Karl");
+        Assert.assertEquals(StringFunctions.format("Hallo {user}",values),"Hallo Karl");
+        values.put("user","Herbert");
+        Assert.assertEquals(StringFunctions.format("Hallo {user}",values),"Hallo Herbert");
+        Assert.assertEquals(StringFunctions.format("Hallo {} {user}",values),"Hallo {} Herbert");
+
+        try {
+            Assert.assertEquals(StringFunctions.format("Hallo {s} {user}", values), "Hallo {} Herbert");
+            Assert.fail("should have failed!");
+        } catch (IllegalArgumentException ex) {
+
+        }
+        Assert.assertEquals(StringFunctions.format("Hallo {user}",new Object[][]{{"user","Anna"}}),"Hallo Anna");
+        Assert.assertEquals(StringFunctions.format("Hallo {user}, ich bin {user2}",new Object[][]{{"user","Anna"},{"user2","Karl"}}),"Hallo Anna, ich bin Karl");
+        Assert.assertEquals(StringFunctions.format("Hallo {user}, ich bin {user2}", Map.of("user","Anna","user2","Karl")),"Hallo Anna, ich bin Karl");
+
+
+
+    }
     
     @Test
     public void testRandomKey() {

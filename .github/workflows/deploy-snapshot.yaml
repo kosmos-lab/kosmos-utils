@@ -1,0 +1,29 @@
+name: Publish snapshot package to GitHub Packages
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+
+      - name: version
+        run: echo "::set-output name=version::$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
+        id: version
+      - name: bump
+        if: ${{endsWith(${{ steps.version.outputs.version }}, '-SNAPSHOT')}} == false
+        run: mvn versions:set -DnewVersion=${{ steps.version.outputs.version }}-SNAPSHOT
+      - name: Publish package
+        run: mvn --batch-mode clean deploy -Pgithub
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
