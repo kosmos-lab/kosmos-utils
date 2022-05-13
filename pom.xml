@@ -288,14 +288,17 @@
     <profiles>
         <profile>
             <id>github</id>
-            <repository>
-                <id>github</id>
-                <name>GitHub Packages</name>
-                <url>https://maven.pkg.github.com/ksomos-lab/${artifactId}</url>
-                <snapshots>
-                    <enabled>true</enabled>
-                </snapshots>
-            </repository>
+            <distributionManagement>
+
+                <repository>
+                    <id>github</id>
+                    <name>GitHub Packages</name>
+                    <url>https://maven.pkg.github.com/kosmos-lab/${artifactId}</url>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+            </distributionManagement>
         </profile>
     </profiles>
     <profiles>
