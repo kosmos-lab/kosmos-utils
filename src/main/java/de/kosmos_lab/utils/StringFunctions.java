@@ -1,5 +1,8 @@
 package de.kosmos_lab.utils;
 
+import org.json.JSONArray;
+import org.slf4j.LoggerFactory;
+
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -12,11 +15,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
 public class StringFunctions {
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger("StringFunctions");
 
     private static final SecureRandom random = new SecureRandom();
 
@@ -246,5 +251,33 @@ public class StringFunctions {
             n = input.replace("  ", " ");
         }
         return n;
+
+    }
+
+    public static boolean identical(Set<String> set, String[] list) {
+        //we create a secondary set here with all entries
+        logger.info("set: {}",new JSONArray(set).toString());
+        logger.info("list: {}",list);
+        Set<String> listSet = new HashSet<>();
+        for (String e : list) {
+            if (!set.contains(e)) {
+                logger.warn("set did not contain element {}",e);
+                return false;
+            }
+            listSet.add(e);
+        }
+        for ( String e : set) {
+            //test against the secondary set
+            if (!listSet.contains(e)) {
+                logger.warn("array did not contain element {}",e);
+                return false;
+            }
+        }
+        return true;
+
+
+
+
+
     }
 }

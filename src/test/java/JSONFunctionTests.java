@@ -1,5 +1,6 @@
 
 import de.kosmos_lab.utils.JSONFunctions;
+import de.kosmos_lab.utils.StringFunctions;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.testng.Assert;
@@ -22,7 +23,21 @@ public class JSONFunctionTests {
 
     }
 
-
+    @Test
+    public void testKeys() {
+        JSONObject json = new JSONObject();
+        Assert.assertTrue(StringFunctions.identical(JSONFunctions.keys(json,null), new String[]{}));
+        json.put("test",1);
+        Assert.assertTrue(StringFunctions.identical(JSONFunctions.keys(json,null), new String[]{"test"}));
+        json.put("a-test",1);
+        Assert.assertTrue(StringFunctions.identical(JSONFunctions.keys(json,null), new String[]{"a-test","test"}));
+        json.put("b-test",1);
+        Assert.assertTrue(StringFunctions.identical(JSONFunctions.keys(json,null), new String[]{"a-test","b-test","test"}));
+        json.put("arr",new JSONArray().put(1).put(2));
+        Assert.assertTrue(StringFunctions.identical(JSONFunctions.keys(json,null), new String[]{"arr[0]","arr[1]","a-test","b-test","test"}));
+        json.put("arr2",new JSONArray().put(new JSONArray().put(1).put(2)));
+        Assert.assertTrue(StringFunctions.identical(JSONFunctions.keys(json,null), new String[]{"arr2[0]","arr2[0][0]","arr2[0][1]","arr[0]","arr[1]","a-test","b-test","test"}));
+    }
     @Test
     public void testGetWithPathing() {
         JSONObject json = new JSONObject();
