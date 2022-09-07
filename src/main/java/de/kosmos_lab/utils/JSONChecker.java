@@ -14,7 +14,27 @@ import java.util.LinkedList;
 import java.util.Set;
 
 public class JSONChecker {
-    
+    public static boolean contains(JSONArray array, JSONObject jsonObject) {
+        if (array != null && jsonObject != null) {
+            for (int i = 0; i < array.length(); i++) {
+                try {
+                    JSONObject o = array.getJSONObject(i);
+
+                    if (compare(jsonObject, o)) {
+                        return true;
+                    }
+                } catch (CompareException ex) {
+                    //    ex.printStackTrace();
+
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+
+        return false;
+    }
+
     public static boolean checkValue(JSONObject device, String key, Object expected) throws Exception {
         CompareException laste = null;
         if (device != null && device.has(key)) {
@@ -23,7 +43,7 @@ public class JSONChecker {
                     return true;
                 }
             } catch (CompareException ex) {
-            //ex.printStackTrace();
+                //ex.printStackTrace();
             }
             if (expected instanceof Integer) {
                 try {
@@ -78,7 +98,7 @@ public class JSONChecker {
                 } catch (org.json.JSONException e) {
                     //e.printStackTrace();
                 }
-                
+
             } else if (expected instanceof JSONObject) {
                 try {
                     JSONObject o = (JSONObject) expected;
@@ -86,7 +106,7 @@ public class JSONChecker {
                     if (o.toMap().equals(v.toMap())) {
                         return true;
                     }
-                    
+
                 } catch (org.json.JSONException e) {
                     // e.printStackTrace();
                 }
@@ -101,10 +121,10 @@ public class JSONChecker {
                         if (!o.get(i).equals(v.get(i))) {
                             return false;
                         }
-                        
+
                     }
                     return true;
-                    
+
                 } catch (org.json.JSONException e) {
                     // e.printStackTrace();
                 }
@@ -112,18 +132,18 @@ public class JSONChecker {
                 Boolean o = (Boolean) expected;
                 Boolean v = device.getBoolean(key);
                 return o.equals(v);
-                
+
             } else {
                 throw new Exception("COULD NOT COMPARE " + expected.getClass());
             }
-            
+
             return (expected.toString().equals(device.get(key)));
-            
+
         }
-        
+
         return false;
     }
-    
+
     public static boolean compare(@CheckForNull JSONObject a, @CheckForNull JSONObject b, @Nonnull Set<String> skippedKeys) throws CompareException {
         if (a == null) {
             return b == null;
@@ -144,39 +164,39 @@ public class JSONChecker {
         }
         return true;
     }
-    
+
     public static boolean compare(@CheckForNull JSONObject a, @CheckForNull JSONObject b, @Nonnull String[] skippedKeys) throws CompareException {
         Set<String> keys = new HashSet<>();
         for (String k : skippedKeys) {
             keys.add(k);
         }
-        
+
         return compare(a, b, keys);
     }
-    
+
     public static boolean compare(@CheckForNull JSONObject a, @CheckForNull JSONObject b) throws CompareException {
         return compare(a, b, new HashSet<String>());
     }
-    
-    
+
+
     /**
      * checks if both inputs are comparable, checks based of the type of expected
      * <p>
-     * Supports:
-     * int,double,float,boolean,String,
-     * JSONObject,JSONArray
+     * Supports: int,double,float,boolean,String, JSONObject,JSONArray
      *
      * @param value
      * @param expected
+     *
      * @return
+     *
      * @throws CompareException throws exception if both of them mismatche, with a reason why it mismatched
      */
     public static boolean equals(@CheckForNull Object value, @CheckForNull Object expected) throws CompareException {
         return equals(value, expected, "");
-        
+
     }
-    
-    
+
+
     public static boolean equals(@CheckForNull Object value, @CheckForNull Object expected, @Nonnull String path) throws CompareException {
         if (value == null) {
             if (expected == null) {
@@ -193,7 +213,7 @@ public class JSONChecker {
                     value = Integer.parseInt(value.toString());
                 } catch (NumberFormatException ex) {
                     try {
-                        value =((Double) Double.parseDouble(value.toString())).intValue();
+                        value = ((Double) Double.parseDouble(value.toString())).intValue();
                     } catch (NumberFormatException ex2) {
                         throw new CompareException("NumberFormatException: " + ex.getMessage());
                     }
@@ -212,7 +232,7 @@ public class JSONChecker {
                 } catch (NumberFormatException ex) {
                     //throw new CompareException("NumberFormatException: " + ex.getMessage());
                     try {
-                        value =((Double) Double.parseDouble(value.toString())).longValue();
+                        value = ((Double) Double.parseDouble(value.toString())).longValue();
                     } catch (NumberFormatException ex2) {
                         throw new CompareException("NumberFormatException: " + ex.getMessage());
                     }
@@ -263,7 +283,7 @@ public class JSONChecker {
             throw new CompareException(path, value, expected);
         }
         if (expected instanceof BigInteger) {
-            
+
             if (!(value instanceof BigInteger)) {
                 try {
                     value = BigInteger.valueOf(Long.parseLong(value.toString()));
@@ -299,20 +319,20 @@ public class JSONChecker {
                 o2 = new JSONObject(value);
             }
             if (o2 == null) {
-                
+
                 throw new CompareException(path, "value could not be converted to JSONObject");
-                
+
             }
             JSONObject o1 = (JSONObject) expected;
             Set<String> keys1 = o1.keySet();
             Set<String> keys2 = o2.keySet();
             if (keys1.containsAll(keys2) && keys2.containsAll(keys1)) {
                 for (String k : keys1) {
-                    
+
                     if (!equals(o1.get(k), o2.get(k), ((path.length() > 0) ? (path) : ("$")) + "." + k)) {
                         return false;
                     }
-                    
+
                 }
                 return true;
             } else {
@@ -329,19 +349,19 @@ public class JSONChecker {
                     }
                 }
                 throw new CompareException(path, "Missing keys: [" + String.join(",", missingin2) + "] extra keys: [" + String.join(",", missingin1) + "]");
-                
+
             }
-            
+
         }
         if (expected instanceof JSONArray) {
             JSONArray o2 = null;
             if (value instanceof JSONArray) {
                 o2 = (JSONArray) value;
             } else if (value instanceof String) {
-                o2 = new JSONArray(value);
+                o2 = new JSONArray(String.valueOf(value));
             }
             if (o2 == null) {
-                
+
                 throw new CompareException(path, "value could not be converted to JSONArray");
             }
             JSONArray o1 = (JSONArray) expected;
@@ -351,18 +371,18 @@ public class JSONChecker {
                         return false;
                     }
                 }
-                
+
                 return true;
-                
+
             }
-            
+
             throw new CompareException(path, "Mismatched length of JSONArray");
         }
         if (expected.equals(value)) {
             return true;
         }
         throw new CompareException(path, "No comparison known for " + expected.getClass());
-        
-        
+
+
     }
 }
