@@ -98,6 +98,12 @@ public class JSONChecker {
                 } catch (org.json.JSONException e) {
                     //e.printStackTrace();
                 }
+                Object v = device.opt(key);
+                if (v != null) {
+                    if (String.valueOf(v).equals(expected)) {
+                        return true;
+                    }
+                }
 
             } else if (expected instanceof JSONObject) {
                 try {
@@ -178,7 +184,6 @@ public class JSONChecker {
         return compare(a, b, new HashSet<String>());
     }
 
-
     /**
      * checks if both inputs are comparable, checks based of the type of expected
      * <p>
@@ -196,8 +201,11 @@ public class JSONChecker {
 
     }
 
-
     public static boolean equals(@CheckForNull Object value, @CheckForNull Object expected, @Nonnull String path) throws CompareException {
+        return equals(value, expected, path, ".");
+    }
+
+    public static boolean equals(@CheckForNull Object value, @CheckForNull Object expected, @Nonnull String path, String divider) throws CompareException {
         if (value == null) {
             if (expected == null) {
                 return true;
@@ -306,8 +314,15 @@ public class JSONChecker {
             throw new CompareException(path, value, expected);
         }
         if (expected instanceof String) {
-            if (value.equals(expected)) {
-                return true;
+            if (value != null) {
+                if (value.equals(expected)) {
+                    return true;
+                }
+
+
+                if (String.valueOf(value).equals(expected)) {
+                    return true;
+                }
             }
             throw new CompareException(path, value, expected);
         }
@@ -329,7 +344,7 @@ public class JSONChecker {
             if (keys1.containsAll(keys2) && keys2.containsAll(keys1)) {
                 for (String k : keys1) {
 
-                    if (!equals(o1.get(k), o2.get(k), ((path.length() > 0) ? (path) : ("$")) + "." + k)) {
+                    if (!equals(o1.get(k), o2.get(k), ((path.length() > 0) ? (path) : ("$")) + divider + k, divider)) {
                         return false;
                     }
 
@@ -384,5 +399,33 @@ public class JSONChecker {
         throw new CompareException(path, "No comparison known for " + expected.getClass());
 
 
+    }
+
+    public static Set<String> diff(JSONObject json1, JSONObject json2) {
+        return diff(json1, json2, "");
+    }
+
+    public static Set<String> diff(JSONObject json1, JSONObject json2, String path) {
+        Set<String> set = new HashSet<>();
+        Set<String> keys = new HashSet<>();
+        keys.addAll(json1.keySet());
+        keys.addAll(json2.keySet());
+
+        for (String name : keys) {
+            try {
+                equals(json1.opt(name), json2.opt(name), (path.length() == 0) ? (name) : (path + "." + name), "/");
+            } catch (CompareException e) {
+                set.add(e.path);
+                //throw new RuntimeException(e);
+                /*if (path.length()==0) {
+                    set.add(name);
+                }
+                else {
+                    set.add(path + "/" + name);
+                }*/
+            }
+        }
+
+        return set;
     }
 }

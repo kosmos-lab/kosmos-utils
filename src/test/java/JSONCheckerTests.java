@@ -6,6 +6,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import org.testng.collections.Sets;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class JSONCheckerTests {
     protected static final Logger logger = LoggerFactory.getLogger("JSONCheckerTests");
@@ -33,16 +38,126 @@ public class JSONCheckerTests {
     }
 
     @Test
+    public void testDiff() {
+
+        Object[][] dataset = {
+                /*{
+                        new JSONObject().put("a", "a"),
+                        new JSONObject().put("a", "a"),
+                        new JSONArray()
+                },*/
+                {
+                        new JSONObject().put("a", "a"),
+                        new JSONObject().put("a", "a"),
+                        new HashSet<String>()
+                },
+
+                /*{
+                        new JSONObject().put("a", "a"),
+                        new JSONObject().put("a", "b"),
+                        new JSONArray().put("a")
+                },*/
+                {
+                        new JSONObject().put("a", "a"),
+                        new JSONObject().put("a", "b"),
+                        Sets.newHashSet("a")
+                },
+                /*{
+                        new JSONObject().put("a", new JSONObject().put("a", "a")),
+                        new JSONObject().put("a", new JSONObject().put("a", "b")),
+                        new JSONArray().put("a/a")
+                },*/
+                {
+                        new JSONObject().put("a", new JSONObject().put("a", "a")),
+                        new JSONObject().put("a", new JSONObject().put("a", "b")),
+                        Sets.newHashSet("a/a")
+                },
+                /*{
+                        new JSONObject().put("c", "c").put("a", new JSONObject().put("a", "a")),
+                        new JSONObject().put("a", new JSONObject().put("a", "b")),
+                        new JSONArray().put("a/a").put("c")
+                },*/
+                {
+                        new JSONObject().put("c", "c").put("a", new JSONObject().put("a", "a")),
+                        new JSONObject().put("a", new JSONObject().put("a", "b")),
+                        Sets.newHashSet("a/a", "c")
+                },
+                /*{
+                        new JSONObject().put("c", "c").put("a", new JSONObject().put("a", "a")),
+                        new JSONObject().put("c", "c").put("a", new JSONObject().put("a", "b")),
+                        new JSONArray().put("a/a")
+                },*/
+                {
+                        new JSONObject().put("c", "c").put("a", new JSONObject().put("a", "a")),
+                        new JSONObject().put("c", "c").put("a", new JSONObject().put("a", "b")),
+                        Sets.newHashSet("a/a")
+                },
+/*                {
+                        new JSONObject().put("c", "c").put("a", new JSONObject().put("a", new JSONObject().put("c", "c").put("a", new JSONObject().put("a", "a")))),
+                        new JSONObject().put("c", "c").put("a", new JSONObject().put("a", new JSONObject().put("c", "c").put("a", new JSONObject().put("a", "a")))),
+                        new JSONArray()
+                },*/
+                {
+                        new JSONObject().put("c", "c").put("a", new JSONObject().put("a", new JSONObject().put("c", "c").put("a", new JSONObject().put("a", "a")))),
+                        new JSONObject().put("c", "c").put("a", new JSONObject().put("a", new JSONObject().put("c", "c").put("a", new JSONObject().put("a", "a")))),
+                        new HashSet<String>()
+                },
+                /*{
+                        new JSONObject().put("c", "c").put("a", new JSONObject().put("a", new JSONObject().put("c", "c").put("a", new JSONObject().put("a", "a")))),
+                        new JSONObject().put("c", "c").put("a", new JSONObject().put("a", new JSONObject().put("c", "d").put("a", new JSONObject().put("a", "a")))),
+                        new JSONArray().put("a/a/c")
+                },*/
+                {
+                        new JSONObject().put("c", "c").put("a", new JSONObject().put("a", new JSONObject().put("c", "c").put("a", new JSONObject().put("a", "a")))),
+                        new JSONObject().put("c", "c").put("a", new JSONObject().put("a", new JSONObject().put("c", "d").put("a", new JSONObject().put("a", "a")))),
+                        Sets.newHashSet("a/a/c")
+                }
+        };
+        for (Object[] set : dataset) {
+            try {
+                if (set[1] instanceof JSONObject && set[0] instanceof JSONObject) {
+                    if (set[2] instanceof JSONArray) {
+                        Set<String> dset = JSONChecker.diff((JSONObject) set[0], (JSONObject) set[1]);
+
+                        JSONArray diff = new JSONArray(dset);
+                        logger.info("diff {} vs {} = {}=={}", set[0], set[1], set[2], dset);
+                        JSONChecker.equals(diff, set[2]);
+                    } else if (set[2] instanceof HashSet) {
+                        Set<String> dset = JSONChecker.diff((JSONObject) set[0], (JSONObject) set[1]);
+                        logger.info("diff  {} vs {} = {}=={}", set[0], set[1], set[2], dset);
+                        if (!dset.equals(set[2])) {
+                            Assert.fail("did not have correct value for diff");
+                        }
+                    }
+                    else {
+                        Assert.fail(String.format("could not understand compare example %s ", set[2].getClass()));
+                    }
+
+                } else {
+                    Assert.fail(String.format("could not compare %s and %s", set[0].getClass(), set[1].getClass()));
+
+                }
+
+
+            } catch (CompareException e) {
+                Assert.fail("did not have corrent value for diff", e);
+            }
+        }
+
+
+    }
+
+    @Test
     public void testContains() {
         Assert.assertFalse(JSONChecker.contains(null, null));
         Assert.assertFalse(JSONChecker.contains(null, new JSONObject()));
         Assert.assertFalse(JSONChecker.contains(new JSONArray(), null));
         Assert.assertFalse(JSONChecker.contains(new JSONArray(), new JSONObject()));
 
-        Assert.assertFalse(JSONChecker.contains(new JSONArray().put(new JSONObject().put("name","test")), new JSONObject().put("name","test2")));
-        Assert.assertTrue(JSONChecker.contains(new JSONArray().put(new JSONObject().put("name","test")), new JSONObject().put("name","test")));
-        Assert.assertTrue(JSONChecker.contains(new JSONArray().put(new JSONObject().put("name","test3").put("name","test")), new JSONObject().put("name","test")));
-        Assert.assertFalse(JSONChecker.contains(new JSONArray().put(new JSONObject().put("name","test3").put("name","test")), new JSONObject().put("asd","test")));
+        Assert.assertFalse(JSONChecker.contains(new JSONArray().put(new JSONObject().put("name", "test")), new JSONObject().put("name", "test2")));
+        Assert.assertTrue(JSONChecker.contains(new JSONArray().put(new JSONObject().put("name", "test")), new JSONObject().put("name", "test")));
+        Assert.assertTrue(JSONChecker.contains(new JSONArray().put(new JSONObject().put("name", "test3").put("name", "test")), new JSONObject().put("name", "test")));
+        Assert.assertFalse(JSONChecker.contains(new JSONArray().put(new JSONObject().put("name", "test3").put("name", "test")), new JSONObject().put("asd", "test")));
 
     }
 
